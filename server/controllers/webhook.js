@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import Transaction from "../models/transcation.js";
 import User from "../models/user.js";
+import { response } from "express";
 
 export const stripeWebHook = async (req, res) => {
     const stripe = new Stripe(process.env.STRIPE_SEC_KEY);
@@ -40,38 +41,38 @@ export const stripeWebHook = async (req, res) => {
 
                 const { transactionId, appId } = session.metadata;
 
-                if (appId !== "genralgpt") {
-                    return res.json({
-                        received: true,
-                        message: "Ignored Event: Invalid app",
+                if (appId === "genralGpt") {
+
+
+                    const transaction = await Transaction.findOne({
+                        transactionId,
+                        isPaid: false,
+                    });
+
+                    if (!transaction) {
+                        return res.status(404).send("Transaction not found");
+                    }
+
+                    await User.updateOne(
+                        { _id: transaction.userId },
+                        { $inc: { credits: transaction.credits } }
+                    );
+
+                    transaction.isPaid = true;
+                    await transaction.save();
+                } else {
+                    return response.json({
+                        received: true, message: "Ignored event Invalid app"
                     });
                 }
-
-                const transaction = await Transaction.findOne({
-                    transactionId,
-                    isPaid: false,
-                });
-
-                if (!transaction) {
-                    return res.status(404).send("Transaction not found");
-                }
-
-                await User.updateOne(
-                    { _id: transaction.userId },
-                    { $inc: { credits: transaction.credits } }
-                );
-
-                transaction.isPaid = true;
-                await transaction.save();
-
                 break;
             }
 
             default:
-                console.log("Unhandled event type:", event.type);
+                console.log("Unhandled event type:", event.type)
+                break;
         }
 
-        res.json({ received: true });
 
     } catch (err) {
         console.error("Webhook processing error:", err);

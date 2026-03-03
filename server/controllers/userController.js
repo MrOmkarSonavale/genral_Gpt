@@ -1,7 +1,7 @@
 import User from '../models/user.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import Chat from '../models/chat.js';
+
 
 //genrate token
 const genrateToken = (id) => {

@@ -3,7 +3,7 @@ import { registerUser, loginUser, getUser } from "../controllers/userController.
 import { protect } from "../middlewares/auth.js";
 const userRouter = express.Router();
 
-userRouter.get('/register', registerUser);
+userRouter.post('/register', registerUser);
 
 userRouter.post('/login', loginUser);
 

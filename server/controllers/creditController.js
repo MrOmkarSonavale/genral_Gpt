@@ -49,7 +49,6 @@ export const purchasePlan = async (req, res) => {
 
 
         if (!plan) {
-
             return res.json({ success: false, message: "invalid plan" })
         }
 
